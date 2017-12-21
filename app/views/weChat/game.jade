@@ -1,0 +1,149 @@
+extends ../weChat
+
+block content
+    h1 点击标题，开始录音翻译
+    p#title
+    #director
+    #year
+    #poster
+    script.
+        wx.config({
+            debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+            appId: 'wx7dfb09a7fabef898', // 必填，公众号的唯一标识
+            timestamp: '#{timestamp}', // 必填，生成签名的时间戳
+            nonceStr: '#{noncestr}', // 必填，生成签名的随机串
+            signature: '#{signature}',// 必填，签名，见附录1
+            jsApiList: [
+                'onMenuShareTimeline',
+                'onMenuShareAppMessage',
+                'onMenuShareQQ',
+                'onMenuShareWeibo',
+                'onMenuShareQZone',
+                'startRecord',
+                'stopRecord',
+                'onVoiceRecordEnd',
+                'playVoice',
+                'pauseVoice',
+                'stopVoice',
+                'onVoicePlayEnd',
+                'uploadVoice',
+                'downloadVoice',
+                'chooseImage',
+                'previewImage',
+                'uploadImage',
+                'downloadImage',
+                'translateVoice',
+                'getNetworkType',
+                'openLocation',
+                'getLocation',
+                'hideOptionMenu',
+                'showOptionMenu',
+                'hideMenuItems',
+                'showMenuItems',
+                'hideAllNonBaseMenuItem',
+                'showAllNonBaseMenuItem',
+                'closeWindow',
+                'scanQRCode',
+                'chooseWXPay',
+                'openProductSpecificView',
+                'addCard',
+                'chooseCard',
+                'openCard',
+            ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+        })
+        wx.ready( _ => {
+            wx.checkJsApi({
+                jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareQZone', 'startRecord', 'stopRecord', 'onVoiceRecordEnd', 'playVoice', 'pauseVoice', 'stopVoice', 'onVoicePlayEnd', 'uploadVoice', 'downloadVoice', 'chooseImage', 'previewImage', 'uploadImage', 'downloadImage', 'translateVoice', 'getNetworkType', 'openLocation', 'getLocation', 'hideOptionMenu', 'showOptionMenu', 'hideMenuItems', 'showMenuItems', 'hideAllNonBaseMenuItem', 'showAllNonBaseMenuItem', 'closeWindow', 'scanQRCode', 'chooseWXPay', 'openProductSpecificView', 'addCard', 'chooseCard','openCard'],
+                success(res) {
+                    console.log(res)
+                }
+            })
+            // 分享给朋友
+            let shareContent = {
+                title: '搜电影喽',
+                desc: '可以搜电影哦！',
+                link: 'https://www.imooc.com',
+                imgUrl: 'https://www.imooc.com/static/img/index/logo_new.png',
+                success() {
+                    window.alert('分享成功')
+                },
+                cancel() {
+                    window.alert('分享失败')
+                }
+            }
+            window.alert( JSON.stringify(shareContent) )
+            wx.onMenuShareAppMessage( shareContent )
+
+            let slides
+            let isRecording = false
+            $('h1').on('tap', _ => {
+                if(!isRecording) {
+                    isRecording = true
+                    wx.startRecord({
+                        cancel() {
+                            window.alert('那就不能搜了哦')
+                        }
+                    })
+                    reutrn
+                }
+                isRecording = false
+
+                wx.stopRecord({
+                    success(res) {
+                        const localId = res.localId
+                        wx.translateVoice({
+                            localId,
+                            isShowProgressTips: 1,
+                            success(res) {
+                                console.log(res.translateResult)
+                                result = res.translateResult
+                                $.ajax({
+                                    type: 'get',
+                                    url: 'https://api.douban.com/v2/movie/search?q=' + result ,
+                                    dataType: 'jsonp',
+                                    success(data) {
+                                        const subject = data.subjects[0]
+
+                                        $('#title').html(subject.title)
+                                        $('#director').html(subject.directors[0].name)
+                                        $('#year').html(subject.year)
+                                        $('#poster').html('<img src="' + subject.images.large + '" alt="" />')
+
+                                        slides = {
+                                            current: subject.images.large,
+                                            urls: [subject.images.large]
+                                        }
+                                        data.subjects.forEach( item => {
+                                            slides.urls.push(item.images.large)
+                                        })
+
+                                        shareContent = {
+                                            title: subject.title,
+                                            desc: '我搜出来了 ' + subject.title,
+                                            link: 'https://www.imooc.com/',
+                                            imgUrl: subject.images.large,
+                                            success() {
+                                                window.alert('分享成功')
+                                            },
+                                            cancel() {
+                                                window.alert('分享失败')
+                                            }
+                                        }
+                                        window.alert(JSON.stringify( shareContent ) )
+                                        wx.onMenuShareAppMessage( shareContent )
+
+                                    }
+                                })
+
+                            }
+                        })
+
+                    }
+                })
+            })
+
+            // 预览图片接口, 像幻灯片一样切换
+            $('#poster').on('tap', _ => {
+                wx.previewImage( slides )
+            })
+        })

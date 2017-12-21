@@ -1,0 +1,23 @@
+# 设置管理员
+    db.users.update({name: 'name'}, {$set: {role: 11}})
+# 全部网页
+# 域名serverUrl.url
+    /user/signup
+    /user/signin
+    /signup
+    /signin
+    /logout
+    /admin/user/list
+
+    /weChat/movie
+
+    /movie/:id
+    /admin/movie/new
+    /admin/movie/update/:id
+    /admin/movie/list
+
+    /admin/category/new
+    /admin/category/list
+
+    /results
+# 
