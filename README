@@ -1,3 +1,4 @@
+使用node.js，mongodb、mongoose、koa、jade开发一个
 # 设置管理员
     db.users.update({name: 'name'}, {$set: {role: 11}})
 # 全部网页
@@ -20,4 +21,3 @@
     /admin/category/list
 
     /results
-# 
