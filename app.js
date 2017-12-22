@@ -60,6 +60,7 @@ app.use(views(__dirname + '/app/views', {
 
 app.keys = ['wexin_dev']
 app.use(session(app))
+// 使用bodyParser 后就可以用 ctx.request.body 获取到相应的传参信息， 没有使用bodyParser body就会是一个空对象
 app.use(bodyParser())
 
 app.use( async (ctx, next) => {
@@ -78,12 +79,6 @@ app.use( async (ctx, next) => {
 })
 
 require('./config/routes')(router)
-
-/*
-router.get('/movie', game.guess)
-router.get('/movie/:id', game.find)
-router.get('/wx', weChat.hear)
-router.post('/wx', weChat.hear)*/
 
 app.use(router.routes())
     .use(router.allowedMethods())

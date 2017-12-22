@@ -38,27 +38,9 @@ module.exports = (opts, handler) => {
                 encoding: ctx.charset
             })
             console.log(data.toString())
-            /*<xml>
-                <ToUserName><![CDATA[gh_eda0f88df83c]]></ToUserName>
-                <FromUserName><![CDATA[oDVEn1AIhUMQaybpRNEyzJqLj3kY]]></FromUserName>
-                <CreateTime>1512976806</CreateTime>
-                <MsgType><![CDATA[event]]></MsgType>
-                <Event><![CDATA[subscribe]]></Event>
-                <EventKey><![CDATA[]]></EventKey>
-            </xml>*/
             // 将 XML 格式的数据转为 JSON
             const content = await util.parseXMLAsync(data)
             console.log( content, 'content' )
-            /*{
-                xml: {
-                    ToUserName: [ 'gh_eda0f88df83c' ],
-                    FromUserName: [ 'oDVEn1AIhUMQaybpRNEyzJqLj3kY' ],
-                    CreateTime: [ '1512976806' ],
-                    MsgType: [ 'event' ],
-                    Event: [ 'subscribe' ],
-                    EventKey: [ '' ]
-                 }
-             }*/
 
             const message = util.formatMassage(content.xml)
             console.log(message, 'message')
@@ -68,35 +50,6 @@ module.exports = (opts, handler) => {
             await handler.call(ctx, next)
 
             weChat.reply.call(ctx)
-            /*if(message.MsgType === 'event') {
-                if(message.Event === 'subscribe') { // 订阅事件
-                    const now = Date.now()
-                    const reply = `<xml>
-                        <ToUserName><![CDATA[${message.FromUserName}]]></ToUserName>
-                        <FromUserName><![CDATA[${message.ToUserName}]]></FromUserName>
-                        <CreateTime>${now}</CreateTime>
-                        <MsgType><![CDATA[text]]></MsgType>
-                        <Content><![CDATA[欢迎您的关注]]></Content>
-                    </xml>`
-                    ctx.status = 200
-                    ctx.type = 'application/xml'
-                    ctx.body = reply
-                    // console.log(ctx.response.body, 'ctx.response.body')
-                    return
-                }
-            } else {
-                const now = Date.now()
-                ctx.status = 200
-                ctx.type = 'application/xml'
-                ctx.body = `<xml>
-                    <ToUserName><![CDATA[${message.FromUserName}]]></ToUserName>
-                    <FromUserName><![CDATA[${message.ToUserName}]]></FromUserName>
-                    <CreateTime>${now}</CreateTime>
-                    <MsgType><![CDATA[text]]></MsgType>
-                    <Content><![CDATA[你好， ^_^]]></Content>
-                    <MsgId><![CDATA[${message.MsgId}]]></MsgId>
-                </xml>`
-            }*/
         }
     }
 }

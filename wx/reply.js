@@ -1,21 +1,21 @@
 'use strict'
 
 const Movie = require('../app/api/movie')
-const serverUrl = require('../config/serverUrl')
+const wx = require('./index')
+const weChatApi = wx.getWeChat()
 
 const help = `回复 1，测试文字回复
 回复 2，测试图文回复
-回复 首页，进入电影首页
 回复 电影名字，查询电影信息
 回复 语音，查询电影信息
-也可以点击 <a href="http://cpjp22.natappfree.cc/movie">语音查电影</a>
+也可以点击 <a href="${wx.weChatOptions.weChat.url}weChat/movie">语音查电影</a>
 `
 
 exports.reply = async function(next) {
     // await next()
     // 这里的this为 generator 里面的 async 中的ctx
     const message = this.weixinMsg
-
+    // console.log(wx)
     if(message.MsgType === 'event') {
         switch(message.Event) {
             case 'subscribe':
@@ -45,7 +45,7 @@ exports.reply = async function(next) {
                                 title: movie.title,
                                 discription: movie.title,
                                 picUrl: movie.poster,
-                                url: `${serverUrl.url}weChat/jump/${movie._id}`
+                                url: `${wx.weChatOptions.weChat.url}weChat/jump/${movie._id}`
                             })
                         })
                         break;
@@ -56,7 +56,7 @@ exports.reply = async function(next) {
                                 title: movie.title,
                                 discription: movie.title,
                                 picUrl: movie.poster,
-                                url: `${serverUrl.url}weChat/jump/${movie._id}`
+                                url: `${wx.weChatOptions.weChat.url}weChat/jump/${movie._id}`
                             })
                         })
                         break;
@@ -95,7 +95,7 @@ exports.reply = async function(next) {
                                 title: movie.title,
                                 discription: movie.title,
                                 picUrl: movie.poster,
-                                url: `${serverUrl.url}weChat/jump/${movie._id}`
+                                url: `${wx.weChatOptions.weChat.url}weChat/jump/${movie._id}`
                             })
                         })
                     } else {
@@ -130,6 +130,9 @@ exports.reply = async function(next) {
                     }*/
                 ]
                 break;
+            /*case '3':
+                reply = await weChatApi.testConnection()
+                break;*/
             default:
                 let movies = await Movie.searchByName(content)
                 if(!movies || movies.length === 0) {
@@ -144,7 +147,7 @@ exports.reply = async function(next) {
                             title: movie.title,
                             description: movie.title,
                             picUrl: movie.poster,
-                            url: `${serverUrl.url}weChat/jump/${movie._id}`
+                            url: `${wx.weChatOptions.weChat.url}weChat/jump/${movie._id}`
                         })
                     })
                 } else {
@@ -156,7 +159,7 @@ exports.reply = async function(next) {
     } else if(message.MsgType === 'voice') {
         let reply
         const voiceText = message.Recognition
-        const movies = await Movie.searchByName(voiceText)
+        let movies = await Movie.searchByName(voiceText)
         if(!movies || movies.length === 0) {
             movies = await Movie.searchByDouban(voiceText)
         }
@@ -169,7 +172,7 @@ exports.reply = async function(next) {
                     title: movie.title,
                     description: movie.title,
                     picUrl: movie.poster,
-                    url: `${serverUrl.url}weChat/jump/${movie._id}`
+                    url: `${wx.weChatOptions.weChat.url}weChat/jump/${movie._id}`
                 })
             })
         } else {

@@ -39,9 +39,6 @@ exports.writeFileAsync = (fpath, content) => {
     })
 }
 
-
-
-
 const crypto = require('crypto')
 // 生成随机字符串
 const createNonce = _ => {

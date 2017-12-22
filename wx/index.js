@@ -8,11 +8,10 @@ const weChat_ticket_file = path.join(__dirname, '../config/weChatTicket.txt')
 
 const config = {
     weChat: {
-        // appID: 'wx46ef7cf701e8e338',
-        // appSecret: '05e6431654ffc7fe5682d4f8e4646f00',
         appID: 'wx7dfb09a7fabef898', // 测试账号
         appSecret: 'd51baec8420b786b1898944fcac85601',
         token: 'guiguzigangdeveloper',
+        url: 'http://fzpkxb.natappfree.cc/',
         getAccessToken() {
             return util.readFileAsync(weChat_file)
         },

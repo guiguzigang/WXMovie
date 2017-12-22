@@ -7,6 +7,7 @@ const util = require('./util')
 // 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET'
 const prefix = 'https://api.weixin.qq.com/cgi-bin/'
 const mpPrefix = 'https://mp.weixin.qq.com/cgi-bin/'
+const webOauthPrefix = 'https://api.weixin.qq.com/sns/'
 const semanticUrl = 'https://api.weixin.qq.com/semantic/semproxy/search'
 const api = {
     semanticUrl,
@@ -106,7 +107,17 @@ const api = {
     ticket: {
         // 获取jsapi_ticket  https://api.weixin.qq.com/cgi-bin/ticket/getticket?access\_token=ACCESS\_TOKEN&type=jsapi
         get: `${prefix}ticket/getticket?`,
-    }
+    },
+    webOauth: {
+        // 获取code后，请求以下链接获取access_token：  https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code
+        access_token: `${webOauthPrefix}oauth2/access_token?`,
+        // 获取第二步的refresh_token后，请求以下链接获取access_token： https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=APPID&grant_type=refresh_token&refresh_token=REFRESH_TOKEN
+        refresh_token: `${webOauthPrefix}oauth2/refresh_token?`,
+        // 需scope为 snsapi_userinfo http：GET（请使用https协议） https://api.weixin.qq.com/sns/userinfo?access_token=ACCESS_TOKEN&openid=OPENID&lang=zh_CN
+        userinfo: `${webOauthPrefix}userinfo?`,
+        // 检验授权凭证（access_token）是否有效  https://api.weixin.qq.com/sns/auth?access_token=ACCESS_TOKEN&openid=OPENID
+    },
+
 }
 
 class WeChat {
@@ -117,6 +128,8 @@ class WeChat {
         this.saveAccessToken = opts.saveAccessToken
         this.getTicket = opts.getTicket
         this.saveTicket = opts.saveTicket
+        this.getWebAccessToken = opts.getWebAccessToken
+        this.saveWebAccessToken = opts.saveWebAccessToken
         this.getAccessToken()
             .then( data => {
                 try {
@@ -183,29 +196,6 @@ class WeChat {
                 return Promise.resolve(this)
             }
         }
-        /*return new Promise((resolve, reject) => {
-            this.getAccessToken()
-            .then( data => {
-                try {
-                    data = JSON.parse(data)
-                } catch(e) {
-                    return Promise.resolve( this.updateAccessToken() )
-                }
-                if(this.isValidAccessToken(data)) {
-                    return Promise.resolve(data)  // 这里不return 下面data为undefined
-                } else {
-                    return Promise.resolve( this.updateAccessToken() )
-                }
-            })
-            .then( data => {
-
-                this.access_token = data.access_token
-                this.expires_in = data.expires_in
-                this.saveAccessToken(data)
-
-                return resolve(data)
-            })
-        })*/
         return this.getAccessToken()
             .then( data => {
                 try {
@@ -266,7 +256,7 @@ class WeChat {
         })
     }
 
-    //
+    // 验证ticket是否合法
     isValidTicket(data) {
         if(!data || !data.ticket || !data.expires_in) {
             return false
@@ -1308,6 +1298,24 @@ class WeChat {
                         }).catch(err => {
                             reject(err)
                         })
+                }).catch(err => {
+                    reject(err)
+                })
+        })
+    }
+
+    /***/
+    testConnection() {
+        return new Promise( (resolve, reject) => {
+            request({method: 'POST', url: 'http://192.168.82.31:8200', body: { message: '测试连接另一台服务器'}, json: true})
+                .then( response => {
+                    const _data = response.body
+
+                    if(_data) {
+                        resolve(_data)
+                    } else {
+                        throw new Error ('Create short url fails')
+                    }
                 }).catch(err => {
                     reject(err)
                 })

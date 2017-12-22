@@ -9,6 +9,14 @@ const UserSchema = new mongoose.Schema({
     },
     password: String,
     openid: String,
+    // nickname: String,
+    sex: String,
+    province: String,
+    city: String,
+    country: String,
+    headimgurl: String,
+    privilege: String,
+    unionid: String,
     // 0: nomal user
     // 1: verified user
     // 2: professonal user
