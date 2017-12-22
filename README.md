@@ -103,3 +103,8 @@
     http://×××××.natappfree.cc/admin/category/list
 ###### 搜索结果
     http://×××××.natappfree.cc/results
+
+```
+npm install
+npm start
+```
